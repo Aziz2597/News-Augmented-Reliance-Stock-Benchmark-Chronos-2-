@@ -1,6 +1,9 @@
 FROM python:3.11-slim
 WORKDIR /app
 
+# Install system dependencies (git is required to fetch chronos-forecasting from GitHub)
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+
 # Copy dependencies first to leverage Docker caching
 COPY requirements.txt .
 
