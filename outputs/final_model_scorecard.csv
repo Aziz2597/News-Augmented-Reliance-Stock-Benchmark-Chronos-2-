@@ -1,0 +1,4 @@
+Configuration,MAE (INR),RMSE (INR),Directional Accuracy (%)
+N - Naive Baseline,12.43,15.46,0.0
+C0 - Chronos-2 prices,12.49,15.88,50.77
+C1 - Chronos-2 + news,12.57,15.64,50.77
