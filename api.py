@@ -54,10 +54,10 @@ def trigger_pipeline(
         os.makedirs("outputs", exist_ok=True)
 
         scripts = [
-            "feature_builder.py",
-            "run_forecasts.py",
-            "evaluate_scorecard.py",
-            "upload_results.py"
+            "src/feature_builder.py",
+            "src/run_forecasts.py",
+            "src/evaluate_scorecard.py",
+            "src/upload_results.py"
         ]
 
         for script in scripts:
