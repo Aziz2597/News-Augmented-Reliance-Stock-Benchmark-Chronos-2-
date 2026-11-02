@@ -1,20 +1,37 @@
+
 FROM python:3.11-slim
+
 WORKDIR /app
 
-# Install system dependencies (git is required to fetch chronos-forecasting from GitHub)
-RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Copy dependencies first to leverage Docker caching
+# Install Git for Chronos GitHub dependency
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends git ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy dependencies first for Docker layer caching
 COPY requirements.txt .
 
-# Install web server and core requirements
-RUN pip install fastapi uvicorn --no-cache-dir
-RUN pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu --no-cache-dir
-RUN pip install -r requirements.txt --no-cache-dir
+# Install PyTorch CPU
+RUN python -m pip install \
+    torch==2.15.0 \
+    --index-url https://download.pytorch.org/whl/cpu
+
+# Install remaining dependencies
+RUN grep -v '^torch==' requirements.txt > requirements-no-torch.txt && \
+    python -m pip install -r requirements-no-torch.txt && \
+    rm requirements-no-torch.txt && \
+    python -m pip install fastapi uvicorn && \
+    python -m pip check
 
 # Copy project files
 COPY . .
 
-# Expose port and run the API
+# Render supplies PORT dynamically
 EXPOSE 8000
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+
+CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-8000}"]
