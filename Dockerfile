@@ -1,13 +1,15 @@
-
 FROM python:3.12-slim
 
 WORKDIR /app
 
-# Python environment optimizations
+# Python environment and CPU thread optimizations
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV OMP_NUM_THREADS=1
+ENV MKL_NUM_THREADS=1
+ENV OPENBLAS_NUM_THREADS=1
 
 # Install system dependencies
 RUN apt-get update && \
@@ -23,7 +25,6 @@ COPY requirements.txt .
 RUN python -m pip install --upgrade pip
 
 # Install CPU-only PyTorch
-# Verify that this version has a Python 3.12 compatible wheel
 RUN python -m pip install \
     torch==2.15.0 \
     --index-url https://download.pytorch.org/whl/cpu
@@ -49,5 +50,5 @@ RUN mkdir -p /app/outputs
 # Expose API port
 EXPOSE 8000
 
-# Start API
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start API using Render's dynamic PORT variable with a fallback to 8000
+CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port ${PORT:-8000}"]

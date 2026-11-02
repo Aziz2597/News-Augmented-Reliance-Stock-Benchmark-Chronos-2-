@@ -9,6 +9,9 @@ import os
 torch.manual_seed(42)
 np.random.seed(42)
 
+torch.set_num_threads(2)  # Adjust based on your Render CPU allocation (e.g., 2 for 0.5/1 CPU)
+torch.set_num_interop_threads(1)
+
 def run_forecasting_pipeline():
     print("--- Starting Phase 3: Walk-Forward Forecasting Evaluation ---")
 
